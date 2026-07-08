@@ -34,7 +34,7 @@ export default function IndustryPage() {
   const downstream = analysis?.downstream_companies ?? [];
 
   return (
-    <div>
+    <div className="page page-industry">
       <PageHeader title="行业分析模块" description="手动输入行业，拆解上游、中游、下游、核心公司和待验证关系。" />
       <section className="input-band">
         <label>
@@ -101,4 +101,3 @@ function ChainColumn({ title, items, fallback }: { title: string; items: string[
     </div>
   );
 }
-
