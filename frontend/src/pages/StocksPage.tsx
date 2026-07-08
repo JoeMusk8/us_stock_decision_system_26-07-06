@@ -45,7 +45,7 @@ export default function StocksPage() {
   }
 
   return (
-    <div>
+    <div className="page page-stocks">
       <PageHeader title="个股分析模块" description="最多输入 15 只股票，展示财务、资金流向、RSI、均线、成交量和辅助观察区间。" />
       <section className="input-band">
         <label>
@@ -128,4 +128,3 @@ function formatCurrency(value: number | null) {
 function formatPercent(value: number | null) {
   return value === null || value === undefined ? "待验证" : `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
 }
-
