@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: market-decision-assistant
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /api/health/providers
+    envVars:
+      - key: DATABASE_URL
+        value: /app/backend/data/app.sqlite3
+      - key: AI_BASE_URL
+        value: https://api.openai.com/v1
+      - key: AI_MODEL
+        value: gpt-4.1-mini
+      - key: FRONTEND_ORIGIN
+        value: https://market-decision-assistant.onrender.com
+      - key: X_BEARER_TOKEN
+        sync: false
+      - key: FMP_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_API_KEY
+        sync: false
+      - key: AI_API_KEY
+        sync: false
+
