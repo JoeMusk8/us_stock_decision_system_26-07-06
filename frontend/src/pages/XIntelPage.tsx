@@ -75,7 +75,7 @@ export default function XIntelPage() {
   }
 
   return (
-    <div>
+    <div className="page page-x-intel">
       <PageHeader title="信息抓取和分析模块" description="持续跟踪指定 X 账号，分析真实性、相关主题、公司映射和待验证事项。" />
       <section className="input-band">
         <label>
@@ -144,4 +144,3 @@ export default function XIntelPage() {
     </div>
   );
 }
-
