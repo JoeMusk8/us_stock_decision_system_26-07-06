@@ -1,12 +1,3 @@
----
-title: US Stock Decision System
-emoji: 📈
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_port: 7860
----
-
 # 美股交易决策辅助系统 MVP
 
 Python FastAPI + React/TypeScript 全栈应用，包含 4 个互相独立的模块：
@@ -42,16 +33,16 @@ npm run dev
 
 ## 线上部署
 
-仓库已包含一体化 `Dockerfile` 和 `render.yaml`。Render 会构建 React 前端，并由 FastAPI 同域托管静态文件。
+仓库包含 Vercel 全栈部署配置。Vercel 会构建 React 前端，并将 FastAPI 作为 Python Function 同域托管。
 
 部署步骤：
 
 1. 推送代码到 GitHub 仓库。
-2. 在 Render 新建 Blueprint，选择该 GitHub 仓库。
-3. Render 会读取 `render.yaml` 创建 `market-decision-assistant` 服务。
-4. 在 Render 环境变量中填入 `X_BEARER_TOKEN`、`FMP_API_KEY`、`ALPHA_VANTAGE_API_KEY`、`AI_API_KEY`。
+2. 在 Vercel 导入该 GitHub 仓库并选择 Hobby 计划。
+3. Vercel 会读取 `vercel.json`，构建前端并部署 FastAPI。
+4. 在 Vercel 环境变量中填入 `X_BEARER_TOKEN`、`FMP_API_KEY`、`ALPHA_VANTAGE_API_KEY`、`AI_API_KEY`。
 
-部署后访问 Render 分配的服务 URL 即可查看系统。
+部署后访问 Vercel 分配的服务 URL 即可查看系统。
 
 ## 环境变量
 

@@ -19,6 +19,9 @@ def _load_env_file() -> None:
 _load_env_file()
 
 
+DEFAULT_DATABASE_URL = "/tmp/app.sqlite3" if os.getenv("VERCEL") else "backend/data/app.sqlite3"
+
+
 @dataclass(frozen=True)
 class Settings:
     x_bearer_token: str = os.getenv("X_BEARER_TOKEN", "")
@@ -27,7 +30,7 @@ class Settings:
     ai_api_key: str = os.getenv("AI_API_KEY", "")
     ai_base_url: str = os.getenv("AI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
     ai_model: str = os.getenv("AI_MODEL", "gpt-4.1-mini")
-    database_url: str = os.getenv("DATABASE_URL", "backend/data/app.sqlite3")
+    database_url: str = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
     frontend_origin: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173,http://127.0.0.1:5173")
     app_name: str = "美股交易决策辅助系统"
 
