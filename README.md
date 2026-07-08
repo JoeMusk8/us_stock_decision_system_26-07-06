@@ -1,6 +1,6 @@
 ---
 title: US Stock Decision System
-emoji: chart_with_upwards_trend
+emoji: 📈
 colorFrom: blue
 colorTo: green
 sdk: docker
