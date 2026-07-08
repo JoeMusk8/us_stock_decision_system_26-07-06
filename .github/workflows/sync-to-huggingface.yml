@@ -22,8 +22,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python -m pip install --quiet --upgrade huggingface_hub
-          hf spaces restart JoeMusk8/us-stock-decision-system --token "$HF_TOKEN"
-          if ! hf spaces wait JoeMusk8/us-stock-decision-system --timeout 10m --token "$HF_TOKEN"; then
+          hf spaces restart JoeMusk8/us-stock-decision-system --factory-reboot --token "$HF_TOKEN"
+          if ! hf spaces wait JoeMusk8/us-stock-decision-system --timeout 15m --token "$HF_TOKEN"; then
             if curl --fail --silent --show-error --max-time 30 \
               https://joemusk8-us-stock-decision-system.hf.space/api/health/providers > /dev/null; then
               echo "Space health endpoint is responding despite delayed runtime status."
