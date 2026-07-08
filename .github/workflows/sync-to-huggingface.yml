@@ -22,7 +22,8 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python -m pip install --quiet --upgrade huggingface_hub
-          if ! hf spaces wait JoeMusk8/us-stock-decision-system --timeout 15m --token "$HF_TOKEN"; then
+          if ! hf spaces wait JoeMusk8/us-stock-decision-system --timeout 3m --token "$HF_TOKEN"; then
+            hf spaces logs JoeMusk8/us-stock-decision-system --tail 120 --token "$HF_TOKEN" || true
             hf spaces logs JoeMusk8/us-stock-decision-system --build --tail 120 --token "$HF_TOKEN"
             exit 1
           fi
