@@ -47,20 +47,21 @@ export default function IndustryPage() {
       <div className="grid industry-grid">
         <Panel title="产业链全景图谱" caption="上游 / 中游 / 下游拆解，并标注核心受益公司与待验证关系。">
           <div className="supply-chain">
-            <ChainColumn title="上游：资源 / 设备 / 零部件" items={upstream} fallback={["光器件材料", "半导体设备", "电力设备", "关键零部件", "待验证供应商"]} />
-            <ChainColumn title="中游：制造 / 集成 / 平台" items={midstream} fallback={["光模块 / CPO", "服务器与网络", "存储与 HBM", "系统集成", "核心瓶颈公司"]} />
-            <ChainColumn title="下游：客户 / 应用 / 需求" items={downstream} fallback={["云厂商", "AI训练集群", "数据中心", "机器人应用", "政府/国防合同"]} />
+            <ChainColumn title="上游：资源 / 设备 / 零部件" items={upstream} />
+            <ChainColumn title="中游：制造 / 集成 / 平台" items={midstream} />
+            <ChainColumn title="下游：客户 / 应用 / 需求" items={downstream} />
           </div>
         </Panel>
         <Panel title="核心公司雷达" caption="无法验证的公司关系必须标注待验证。">
           <div className="list">
-            {(analysis?.core_companies.length ? analysis.core_companies : ["NVDA", "AVGO", "LITE", "COHR", "VRT"]).map((company, index) => (
+            {(analysis?.core_companies ?? []).map((company, index) => (
               <div className="company-row" key={company}>
                 <strong>{company}</strong>
-                <span>{analysis ? "AI 输出核心公司" : "示例占位，待验证"}</span>
-                <Badge tone={analysis && index < 2 ? "good" : "warn"}>{analysis && index < 2 ? "直接相关" : "待验证"}</Badge>
+                <span>AI 输出核心公司</span>
+                <Badge tone={index < 2 ? "good" : "warn"}>{index < 2 ? "直接相关" : "待验证"}</Badge>
               </div>
             ))}
+            {!analysis?.core_companies.length ? <EmptyState text="开始分析后显示核心公司与相关等级。" /> : null}
           </div>
         </Panel>
       </div>
@@ -92,12 +93,12 @@ export default function IndustryPage() {
   );
 }
 
-function ChainColumn({ title, items, fallback }: { title: string; items: string[]; fallback: string[] }) {
-  const rows = items.length ? items : fallback;
+function ChainColumn({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="chain-column">
       <h3>{title}</h3>
-      {rows.map((item) => <div className="chain-node" key={item}>{item}</div>)}
+      {items.map((item) => <div className="chain-node" key={item}>{item}</div>)}
+      {!items.length ? <div className="chain-empty">等待 AI 分析结果</div> : null}
     </div>
   );
 }

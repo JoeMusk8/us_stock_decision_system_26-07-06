@@ -114,14 +114,19 @@ async def analyze_stocks(payload: StockRequest) -> list[StockAnalysis]:
         quote = await fmp.quote(symbol)
         profile = await fmp.profile(symbol)
         income = await fmp.income_statement(symbol)
+        try:
+            chart_data = await alpha.technical_series(symbol)
+        except Exception:
+            chart_data = []
+        latest = chart_data[-1] if chart_data else {}
         indicators = {
-            "rsi": await alpha.rsi(symbol),
-            "ma20": await alpha.sma(symbol, 20),
-            "ma50": await alpha.sma(symbol, 50),
-            "ma120": await alpha.sma(symbol, 120),
-            "ma250": await alpha.sma(symbol, 250),
+            "rsi": latest.get("rsi"),
+            "ma20": latest.get("ma20"),
+            "ma50": latest.get("ma50"),
+            "ma120": latest.get("ma120"),
+            "ma250": latest.get("ma250"),
         }
-        results.append(ai.build_stock_analysis(symbol, quote, profile, income, indicators))
+        results.append(ai.build_stock_analysis(symbol, quote, profile, income, indicators, chart_data))
     return results
 
 
@@ -129,13 +134,16 @@ async def analyze_stocks(payload: StockRequest) -> list[StockAnalysis]:
 async def dashboard() -> DashboardResponse:
     nasdaq_quote = await fmp.quote("^IXIC") or await fmp.quote("QQQ")
     btc_quote = await fmp.quote("BTCUSD")
-    nasdaq_indicators = {
-        "rsi": await alpha.rsi("QQQ"),
-        "ma20": await alpha.sma("QQQ", 20),
-        "ma50": await alpha.sma("QQQ", 50),
-        "ma120": await alpha.sma("QQQ", 120),
-        "ma250": await alpha.sma("QQQ", 250),
-    }
+    try:
+        nasdaq_chart = await alpha.technical_series("QQQ")
+    except Exception:
+        nasdaq_chart = []
+    try:
+        bitcoin_chart = await alpha.technical_series("BTC", digital_currency=True)
+    except Exception:
+        bitcoin_chart = []
+    nasdaq_indicators = _latest_indicators(nasdaq_chart)
+    bitcoin_indicators = _latest_indicators(bitcoin_chart)
     events = await events_provider.major_events()
     today = date.today()
     if fmp.configured:
@@ -179,12 +187,15 @@ async def dashboard() -> DashboardResponse:
             "change_percent": (nasdaq_quote or {}).get("changesPercentage"),
             "volume": (nasdaq_quote or {}).get("volume"),
             "money_flow": "纳斯达克资金流向待接入",
+            "chart_data": nasdaq_chart,
             **nasdaq_indicators,
         },
         bitcoin={
             "price": (btc_quote or {}).get("price"),
             "change_percent": (btc_quote or {}).get("changesPercentage"),
             "risk_signal": "风险偏好待验证" if btc_quote is None else "用于辅助观察风险偏好",
+            "chart_data": bitcoin_chart,
+            **bitcoin_indicators,
         },
         sentiment={"label": "数据源待接入", "fear_greed_index": None, "status": "不使用非授权抓取作为默认实现"},
         events=events,
@@ -193,3 +204,13 @@ async def dashboard() -> DashboardResponse:
         data_quality=data_quality,
     )
 
+
+def _latest_indicators(chart_data: list[dict]) -> dict[str, float | None]:
+    latest = chart_data[-1] if chart_data else {}
+    return {
+        "rsi": latest.get("rsi"),
+        "ma20": latest.get("ma20"),
+        "ma50": latest.get("ma50"),
+        "ma120": latest.get("ma120"),
+        "ma250": latest.get("ma250"),
+    }

@@ -79,7 +79,7 @@ class IndustryAnalysis(BaseModel):
 
 
 class StockRequest(BaseModel):
-    symbols: list[str] = Field(min_length=1, max_length=15)
+    symbols: list[str] = Field(min_length=1)
 
     @field_validator("symbols")
     @classmethod
@@ -99,9 +99,26 @@ class StockRequest(BaseModel):
         return result
 
 
+class MarketPoint(BaseModel):
+    date: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: int
+    ma20: float | None = None
+    ma50: float | None = None
+    ma120: float | None = None
+    ma250: float | None = None
+    rsi: float | None = None
+
+
 class StockAnalysis(BaseModel):
     symbol: str
     company_name: str
+    company_background: str
+    main_business: str
+    industry_position: str
     current_price: float | None
     change_percent: float | None
     volume: int | None
@@ -119,6 +136,7 @@ class StockAnalysis(BaseModel):
     risk_range: str
     decision_level: StockDecisionLevel
     data_quality: list[str]
+    chart_data: list[MarketPoint]
 
 
 class DashboardResponse(BaseModel):
@@ -139,4 +157,3 @@ def allowed_values() -> dict[str, list[str]]:
         "stock_decision_levels": STOCK_DECISION_LEVELS,
         "market_levels": MARKET_LEVELS,
     }
-

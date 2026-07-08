@@ -5,6 +5,9 @@ import { Badge, Button, EmptyState, PageHeader, Panel } from "../components/Prim
 type XAccount = { handle: string; created_at: string; since_id?: string | null };
 type XPost = { id: string; handle: string; text: string; created_at: string; source_status?: string };
 type XAnalysis = {
+  original_text: string;
+  published_at: string;
+  account: string;
   topics: string[];
   companies: string[];
   tickers: string[];
@@ -22,6 +25,7 @@ export default function XIntelPage() {
   const [selected, setSelected] = useState<string>("");
   const [posts, setPosts] = useState<XPost[]>([]);
   const [analysis, setAnalysis] = useState<XAnalysis | null>(null);
+  const [selectedPost, setSelectedPost] = useState<XPost | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -67,6 +71,7 @@ export default function XIntelPage() {
 
   async function analyze(post: XPost) {
     setLoading(true);
+    setSelectedPost(post);
     try {
       setAnalysis(await apiPost<XAnalysis>(`/api/x/posts/${post.id}/analyze`));
     } finally {
@@ -121,6 +126,11 @@ export default function XIntelPage() {
         <Panel title="AI 分析输出栏" caption="真实性、映射关系、证据来源和待验证事项。">
           {analysis ? (
             <div className="analysis-block">
+              <div className="current-analysis-object">
+                <h3>当前分析对象</h3>
+                <p>账号：@{selectedPost?.handle || analysis.account}</p>
+                <p>内容：{selectedPost?.text || analysis.original_text}</p>
+              </div>
               <Badge tone="info">真实性：{analysis.truth_level}</Badge>
               <Badge tone="neutral">映射：{analysis.mapping_level}</Badge>
               <h3>相关主题</h3>

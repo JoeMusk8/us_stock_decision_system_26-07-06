@@ -94,7 +94,15 @@ class AIService:
             }
         return IndustryAnalysis(industry_name=industry_name, **data)
 
-    def build_stock_analysis(self, symbol: str, quote: dict | None, profile: dict | None, income: dict | None, indicators: dict[str, float | None]) -> StockAnalysis:
+    def build_stock_analysis(
+        self,
+        symbol: str,
+        quote: dict | None,
+        profile: dict | None,
+        income: dict | None,
+        indicators: dict[str, float | None],
+        chart_data: list[dict[str, Any]] | None = None,
+    ) -> StockAnalysis:
         company_name = (profile or {}).get("companyName") or (quote or {}).get("name") or symbol
         price = _float((quote or {}).get("price"))
         change_percent = _float((quote or {}).get("changesPercentage"))
@@ -140,9 +148,23 @@ class AIService:
             if net_income is not None:
                 financial_summary += f"，净利润 {net_income:,.0f}"
 
+        profile_data = profile or {}
+        description = str(profile_data.get("description") or "").strip()
+        exchange = str(profile_data.get("exchange") or profile_data.get("exchangeShortName") or "").strip()
+        country = str(profile_data.get("country") or "").strip()
+        company_background = description or "公司简介、成立信息与管理层资料待验证"
+        if exchange or country:
+            company_background = f"{company_name}；上市地：{exchange or '待验证'}；国家/地区：{country or '待验证'}。{description}".strip()
+        sector = str(profile_data.get("sector") or "").strip()
+        industry = str(profile_data.get("industry") or "").strip()
+        main_business = " / ".join(value for value in [sector, industry] if value) or "主营业务与收入分部待验证"
+
         return StockAnalysis(
             symbol=symbol,
             company_name=company_name,
+            company_background=company_background,
+            main_business=main_business,
+            industry_position="产业链位置、竞争格局与客户认证待验证",
             current_price=price,
             change_percent=change_percent,
             volume=volume,
@@ -160,6 +182,7 @@ class AIService:
             risk_range=risk_range,
             decision_level=decision,
             data_quality=data_quality,
+            chart_data=chart_data or [],
         )
 
 
@@ -189,4 +212,3 @@ def _trend_label(price: float | None, ma20: float | None, ma50: float | None, ma
     if above >= len(mas) // 2:
         return "震荡"
     return "转弱或下跌"
-

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { apiPost } from "../api/client";
-import { MarketChart } from "../components/MiniCharts";
+import { MarketChart, type MarketPoint } from "../components/MiniCharts";
 import { Badge, Button, EmptyState, Metric, PageHeader, Panel } from "../components/Primitives";
 
 type StockAnalysis = {
   symbol: string;
   company_name: string;
+  company_background: string;
+  main_business: string;
+  industry_position: string;
   current_price: number | null;
   change_percent: number | null;
   volume: number | null;
@@ -23,6 +26,7 @@ type StockAnalysis = {
   risk_range: string;
   decision_level: string;
   data_quality: string[];
+  chart_data: MarketPoint[];
 };
 
 export default function StocksPage() {
@@ -61,12 +65,12 @@ export default function StocksPage() {
         <Panel title="股票列表" caption="每只股票都有独立 AI分析 按钮。">
           <div className="list">
             {stocks.map((stock) => (
-              <button key={stock.symbol} className={`stock-row ${current?.symbol === stock.symbol ? "selected" : ""}`} onClick={() => setSelected(stock.symbol)}>
+              <div key={stock.symbol} className={`stock-row ${current?.symbol === stock.symbol ? "selected" : ""}`}>
                 <strong>{stock.symbol}</strong>
                 <span>{formatCurrency(stock.current_price)}</span>
                 <span>{formatPercent(stock.change_percent)}</span>
-                <Badge tone={stock.decision_level.includes("高风险") ? "bad" : "info"}>{stock.decision_level}</Badge>
-              </button>
+                <Button onClick={() => setSelected(stock.symbol)}>AI分析</Button>
+              </div>
             ))}
             {!stocks.length ? <EmptyState text={loading ? "正在分析..." : "输入股票后开始分析。"} /> : null}
           </div>
@@ -79,7 +83,7 @@ export default function StocksPage() {
                 <Metric label="RSI" value={current.rsi?.toFixed(1) ?? "待验证"} hint={current.rsi && current.rsi >= 70 ? "偏热" : "未极端"} tone={current.rsi && current.rsi >= 70 ? "warn" : "good"} />
                 <Metric label="成交量" value={current.volume?.toLocaleString() ?? "待验证"} hint={current.average_volume ? `均量 ${current.average_volume.toLocaleString()}` : "均量待验证"} />
               </div>
-              <MarketChart title="价格 / 均线 / RSI / 成交量" />
+              <MarketChart title={`${current.symbol} 技术状态`} data={current.chart_data} currentValue={formatCurrency(current.current_price)} />
             </>
           ) : (
             <EmptyState text="等待选择股票。" />
@@ -99,10 +103,12 @@ export default function StocksPage() {
                 <Badge>风险</Badge>
                 <Badge>证据</Badge>
               </div>
-              <h3>公司背景</h3>
-              <p>{current.company_name}</p>
-              <h3>财务兑现</h3>
-              <p>{current.financial_summary}</p>
+              <div className="research-grid">
+                <ResearchCard tone="blue" title="公司背景" text={current.company_background} />
+                <ResearchCard tone="green" title="主营业务" text={current.main_business} />
+                <ResearchCard tone="amber" title="行业地位" text={current.industry_position} />
+                <ResearchCard tone="purple" title="财务兑现" text={current.financial_summary} />
+              </div>
               <h3>综合调研结论</h3>
               <p>{current.ai_conclusion}</p>
               <h3>数据质量</h3>
@@ -113,6 +119,15 @@ export default function StocksPage() {
           )}
         </Panel>
       </div>
+    </div>
+  );
+}
+
+function ResearchCard({ title, text, tone }: { title: string; text: string; tone: "blue" | "green" | "amber" | "purple" }) {
+  return (
+    <div className={`research-card ${tone}`}>
+      <h3>{title}</h3>
+      <p>{text || "待验证"}</p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "../api/client";
-import { MarketChart } from "../components/MiniCharts";
+import { MarketChart, type MarketPoint } from "../components/MiniCharts";
 import { Badge, EmptyState, Metric, PageHeader, Panel } from "../components/Primitives";
 
 type Dashboard = {
@@ -17,9 +17,18 @@ type Dashboard = {
 export default function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState("");
+  const [reminders, setReminders] = useState<string[]>(Array(15).fill(""));
 
   useEffect(() => {
-    apiGet<Dashboard>("/api/dashboard").then(setData).catch((err) => setError(String(err)));
+    apiGet<Dashboard>("/api/dashboard")
+      .then((payload) => {
+        setData(payload);
+        setReminders((current) => current.map((item, index) => {
+          const event = payload.events[index];
+          return item || (event ? `${event.name} / ${event.date}` : "");
+        }));
+      })
+      .catch((err) => setError(String(err)));
   }, []);
 
   return (
@@ -37,16 +46,10 @@ export default function DashboardPage() {
           </div>
           <div className="grid dashboard-grid">
             <Panel title="纳斯达克技术状态图" caption="图形化展示 QQQ / 纳指：K线、MA20、MA50、MA120、MA250、RSI 和成交量。">
-              <div className="chip-row">
-                <Badge>MA20 {formatNumber(data.nasdaq.ma20)}</Badge>
-                <Badge>MA50 {formatNumber(data.nasdaq.ma50)}</Badge>
-                <Badge>MA120 {formatNumber(data.nasdaq.ma120)}</Badge>
-                <Badge>MA250 {formatNumber(data.nasdaq.ma250)}</Badge>
-              </div>
-              <MarketChart title="纳斯达克技术状态" />
+              <MarketChart title="纳斯达克技术状态" data={asChartData(data.nasdaq.chart_data)} currentValue={formatNumber(data.nasdaq.price)} />
             </Panel>
             <Panel title="比特币技术状态图" caption="图形化展示 BTC：实时价格和风险偏好信号。">
-              <MarketChart title="BTC 风险偏好辅助图" />
+              <MarketChart title="比特币技术状态" data={asChartData(data.bitcoin.chart_data)} currentValue={formatCurrency(data.bitcoin.price)} />
             </Panel>
           </div>
           <div className="grid dashboard-bottom">
@@ -58,14 +61,17 @@ export default function DashboardPage() {
               <p className="reading">{data.ai_market_reading}</p>
               <ul>{data.data_quality.map((item) => <li key={item}>{item}</li>)}</ul>
             </Panel>
-            <Panel title="重要事件日历" caption="大非农、美联储议息会议、几家大型科技公司的财报日期。">
-              <div className="event-list">
-                {data.events.map((event) => (
-                  <div className="event-row" key={`${event.name}-${event.date}`}>
-                    <strong>{event.name}</strong>
-                    <span>{event.date}</span>
-                    <Badge tone={event.status.includes("待") || event.status.includes("需") ? "warn" : "good"}>{event.status}</Badge>
-                  </div>
+            <Panel title="自定义时间提醒跟踪输入" caption="具体提醒内容由用户输入，支持 15 个跟踪窗口。">
+              <div className="reminder-head"><Badge tone="info">15个输入窗口</Badge></div>
+              <div className="reminder-grid">
+                {reminders.map((reminder, index) => (
+                  <input
+                    key={index}
+                    value={reminder}
+                    onChange={(event) => setReminders((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))}
+                    placeholder={`提醒${index + 1}：输入事件/日期`}
+                    aria-label={`提醒${index + 1}`}
+                  />
                 ))}
               </div>
             </Panel>
@@ -76,6 +82,10 @@ export default function DashboardPage() {
       )}
     </div>
   );
+}
+
+function asChartData(value: unknown): MarketPoint[] {
+  return Array.isArray(value) ? value as MarketPoint[] : [];
 }
 
 function formatNumber(value: unknown) {
