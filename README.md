@@ -1,3 +1,12 @@
+---
+title: US Stock Decision System
+emoji: chart_with_upwards_trend
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 8000
+---
+
 # 美股交易决策辅助系统 MVP
 
 Python FastAPI + React/TypeScript 全栈应用，包含 4 个互相独立的模块：
