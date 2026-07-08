@@ -23,7 +23,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div>
+    <div className="page page-dashboard">
       <PageHeader title="仪表盘模块" description="只展示关键市场状态：纳斯达克、BTC、情绪、事件日历和市场辅助等级。" />
       {error ? <div className="error-line">{error}</div> : null}
       {data ? (
@@ -89,4 +89,3 @@ function formatCurrency(value: unknown) {
 function formatPercent(value: unknown) {
   return typeof value === "number" ? `${value > 0 ? "+" : ""}${value.toFixed(2)}%` : "待验证";
 }
-
