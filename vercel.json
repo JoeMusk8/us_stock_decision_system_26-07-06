@@ -2,9 +2,15 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "cd frontend && npm ci && npm run build && rm -rf ../backend/app/static && mkdir -p ../backend/app/static && cp -R dist/. ../backend/app/static/",
   "functions": {
-    "server.py": {
+    "api/index.py": {
       "maxDuration": 60,
       "excludeFiles": "{frontend/**,backend/tests/**,**/__pycache__/**,**/*.pyc}"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.py"
+    }
+  ]
 }

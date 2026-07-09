@@ -11,3 +11,5 @@ dist/
 frontend/.vite/
 *.log
 *.tsbuildinfo
+.vercel
+.env*
